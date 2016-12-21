@@ -22,16 +22,15 @@ import javafx.scene.input.KeyEvent;
 final class TextFieldTreeCellImpl extends TreeCell<String> {
     
     private TextField textField;
-    private ContextMenu addMenu = new ContextMenu();
-    private final TreeViewSample outer;
+    private final ContextMenu addMenu = new ContextMenu();
 
-    public TextFieldTreeCellImpl(final TreeViewSample outer) {
-        this.outer = outer;
+    public TextFieldTreeCellImpl(final FXMLController outer) {
         MenuItem addMenuItem = new MenuItem("Add Employee");
         addMenu.getItems().add(addMenuItem);
         addMenuItem.setOnAction(new EventHandler() {
+            @Override
             public void handle(Event t) {
-                TreeItem newEmployee = new TreeItem<String>("New Employee");
+                TreeItem newEmployee = new TreeItem<>("New Employee");
                 getTreeItem().getChildren().add(newEmployee);
             }
         });
@@ -40,12 +39,12 @@ final class TextFieldTreeCellImpl extends TreeCell<String> {
     @Override
     public void startEdit() {
         super.startEdit();
-        if (textField == null) {
-            createTextField();
-        }
-        setText(null);
-        setGraphic(textField);
-        textField.selectAll();
+//        if (textField == null) {
+//            createTextField();
+//        }
+//        setText(null);
+//        setGraphic(textField);
+//        textField.selectAll();
     }
 
     @Override
