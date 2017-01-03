@@ -11,11 +11,12 @@ import javafx.beans.property.SimpleStringProperty;
  *
  * @author keith.paterson
  */
-public class Texture {
+public class TextureNode extends LabelNode {
     
     private final SimpleStringProperty name;
 
-    Texture(String name) {
+    public TextureNode(String name) {
+    	super(name);
         this.name = new SimpleStringProperty(name);
     }
 

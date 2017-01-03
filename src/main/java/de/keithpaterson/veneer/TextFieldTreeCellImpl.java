@@ -19,7 +19,7 @@ import javafx.scene.input.KeyEvent;
  *
  * @author keith.paterson
  */
-final class TextFieldTreeCellImpl extends TreeCell<String> {
+final class TextFieldTreeCellImpl extends TreeCell<LabelNode> {
     
     private TextField textField;
     private final ContextMenu addMenu = new ContextMenu();
@@ -50,12 +50,12 @@ final class TextFieldTreeCellImpl extends TreeCell<String> {
     @Override
     public void cancelEdit() {
         super.cancelEdit();
-        setText((String) getItem());
+        setText(((LabelNode) getItem()).getLabel());
         setGraphic(getTreeItem().getGraphic());
     }
 
     @Override
-    public void updateItem(String item, boolean empty) {
+    public void updateItem(LabelNode item, boolean empty) {
         super.updateItem(item, empty);
         if (empty) {
             setText(null);
@@ -77,13 +77,36 @@ final class TextFieldTreeCellImpl extends TreeCell<String> {
         }
     }
 
+    public void updateItem(String item, boolean empty) {
+        if (empty) {
+            setText(null);
+            setGraphic(null);
+        } else {
+            if (isEditing()) {
+                if (textField != null) {
+                    textField.setText(item);
+                }
+                setText(null);
+                setGraphic(textField);
+            } else {
+                setText(item);
+                setGraphic(getTreeItem().getGraphic());
+                if (!getTreeItem().isLeaf() && getTreeItem().getParent() != null) {
+                    setContextMenu(addMenu);
+                }
+            }
+        }
+    }
+
     private void createTextField() {
         textField = new TextField(getString());
         textField.setOnKeyReleased(new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent t) {
                 if (t.getCode() == KeyCode.ENTER) {
-                    commitEdit(textField.getText());
+                	LabelNode item2 = getItem();
+                	item2.setLabel(textField.getText());
+                    commitEdit(item2);
                 } else if (t.getCode() == KeyCode.ESCAPE) {
                     cancelEdit();
                 }
@@ -92,7 +115,7 @@ final class TextFieldTreeCellImpl extends TreeCell<String> {
     }
 
     private String getString() {
-        return getItem() == null ? "" : getItem().toString();
+        return getItem() == null ? "" : getItem().getLabel();
     }
     
 }
