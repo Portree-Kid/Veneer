@@ -27,4 +27,9 @@ public class TextureNode extends LabelNode {
     public void setName(String fName) {
         name.set(fName);
     }
+
+	public String getTexture() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

@@ -19,6 +19,10 @@ public class LabelNode {
 		return label;
 	}
 	
-	
+
+	@Override
+	public String toString() {
+		return label;
+	}
 
 }

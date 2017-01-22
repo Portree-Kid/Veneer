@@ -12,11 +12,12 @@ import org.python.core.PyString;
 
 /**
  * 
- * Object representing a python texture. Must reside in the package referenced by  
+ * Object representing a python texture. Must reside in the package referenced
+ * by
  * 
  */
 
-public class TextureReference extends PyObject {
+public class Texture extends PyObject {
 
 	static {
 		System.out.println("Loaded Texture");
@@ -37,10 +38,10 @@ public class TextureReference extends PyObject {
 	private PyList requires = null;
 	private PyString name;
 
-	public TextureReference() {
+	public Texture() {
 	}
 
-	public TextureReference(PyObject[] args, String[] keywords) {
+	public Texture(PyObject[] args, String[] keywords) {
 
 		int offset = args.length - keywords.length;
 		System.out.println(offset);
@@ -82,7 +83,8 @@ public class TextureReference extends PyObject {
 	}
 
 	/**
-	 * @param h_size_meters the h_size_meters to set
+	 * @param h_size_meters
+	 *            the h_size_meters to set
 	 */
 	public void setH_size_meters(PyObject h_size_meters) {
 		this.h_size_meters = h_size_meters;
@@ -96,7 +98,8 @@ public class TextureReference extends PyObject {
 	}
 
 	/**
-	 * @param v_size_meters the v_size_meters to set
+	 * @param v_size_meters
+	 *            the v_size_meters to set
 	 */
 	public void setV_size_meters(PyObject v_size_meters) {
 		this.v_size_meters = v_size_meters;
@@ -110,7 +113,8 @@ public class TextureReference extends PyObject {
 	}
 
 	/**
-	 * @param height_max the height_max to set
+	 * @param height_max
+	 *            the height_max to set
 	 */
 	public void setHeight_max(PyObject height_max) {
 		this.height_max = height_max;
@@ -124,7 +128,8 @@ public class TextureReference extends PyObject {
 	}
 
 	/**
-	 * @param height_min the height_min to set
+	 * @param height_min
+	 *            the height_min to set
 	 */
 	public void setHeight_min(PyObject height_min) {
 		this.height_min = height_min;
@@ -138,7 +143,8 @@ public class TextureReference extends PyObject {
 	}
 
 	/**
-	 * @param levels the levels to set
+	 * @param levels
+	 *            the levels to set
 	 */
 	public void setLevels(PyObject levels) {
 		this.levels = levels;
@@ -152,7 +158,8 @@ public class TextureReference extends PyObject {
 	}
 
 	/**
-	 * @param h_cuts the h_cuts to set
+	 * @param h_cuts
+	 *            the h_cuts to set
 	 */
 	public void setH_cuts(PyList h_cuts) {
 		this.h_cuts = h_cuts;
@@ -166,7 +173,8 @@ public class TextureReference extends PyObject {
 	}
 
 	/**
-	 * @param v_cuts the v_cuts to set
+	 * @param v_cuts
+	 *            the v_cuts to set
 	 */
 	public void setV_cuts(PyList v_cuts) {
 		this.v_cuts = v_cuts;
@@ -180,7 +188,8 @@ public class TextureReference extends PyObject {
 	}
 
 	/**
-	 * @param h_can_repeat the h_can_repeat to set
+	 * @param h_can_repeat
+	 *            the h_can_repeat to set
 	 */
 	public void setH_can_repeat(PyBoolean h_can_repeat) {
 		this.h_can_repeat = h_can_repeat;
@@ -194,7 +203,8 @@ public class TextureReference extends PyObject {
 	}
 
 	/**
-	 * @param v_can_repeat the v_can_repeat to set
+	 * @param v_can_repeat
+	 *            the v_can_repeat to set
 	 */
 	public void setV_can_repeat(PyBoolean v_can_repeat) {
 		this.v_can_repeat = v_can_repeat;
@@ -208,7 +218,8 @@ public class TextureReference extends PyObject {
 	}
 
 	/**
-	 * @param v_align_bottom the v_align_bottom to set
+	 * @param v_align_bottom
+	 *            the v_align_bottom to set
 	 */
 	public void setV_align_bottom(PyBoolean v_align_bottom) {
 		this.v_align_bottom = v_align_bottom;
@@ -222,7 +233,8 @@ public class TextureReference extends PyObject {
 	}
 
 	/**
-	 * @param provides the provides to set
+	 * @param provides
+	 *            the provides to set
 	 */
 	public void setProvides(PyList provides) {
 		this.provides = provides;
@@ -236,7 +248,8 @@ public class TextureReference extends PyObject {
 	}
 
 	/**
-	 * @param requires the requires to set
+	 * @param requires
+	 *            the requires to set
 	 */
 	public void setRequires(PyList requires) {
 		this.requires = requires;
@@ -250,9 +263,18 @@ public class TextureReference extends PyObject {
 	}
 
 	/**
-	 * @param name the name to set
+	 * @param name
+	 *            the name to set
 	 */
 	public void setName(PyString name) {
 		this.name = name;
+	}
+
+	@Override
+	public String toString() {
+		String fName = name.toString();
+		if (fName.lastIndexOf("/") >= 0)
+			fName = fName.substring(fName.lastIndexOf("/"), fName.length());
+		return fName;
 	}
 }

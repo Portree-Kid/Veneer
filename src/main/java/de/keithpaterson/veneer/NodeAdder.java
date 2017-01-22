@@ -19,8 +19,9 @@ package de.keithpaterson.veneer;
 
 import org.python.core.PyObject;
 
+import javafx.event.EventType;
 import javafx.scene.control.TreeItem;
-import textures.texture.TextureReference;
+import textures.texture.Texture;
 
 public class NodeAdder extends PyObject {
 
@@ -36,10 +37,10 @@ public class NodeAdder extends PyObject {
 	 */
 
 	public void append(PyObject p) {
-		if (p instanceof TextureReference) {
-			TextureReference t = (TextureReference) p;
-			TreeItem<TextureReference> treeItem = new TreeItem<TextureReference>(t);
-//			treeItem.setValue(value);
+		if (p instanceof Texture) {
+			Texture t = (Texture) p;
+			TreeItem<Texture> treeItem = new TreeItem<Texture>(t);
+			treeItem.setValue(t);
 			node.getChildren().add(treeItem);
 		}
 		System.out.println(p);
