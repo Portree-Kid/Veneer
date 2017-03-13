@@ -1,3 +1,19 @@
 .button {
     -fx-font-weight: bold;
 }
+
+.slider .thumb.arrow-thumb{
+    -fx-shape: "M2.998-0.07L3-1.499l2.998,4L3,6.501l-0.002-1.43l1.976-2.57L2.998-0.07z";
+}
+
+.slider .thumb.borderv{
+    -fx-shape: "M2.998-0.07L3-1.499l2.998,4L3,6.501l-0.002-1.43l1.976-2.57L2.998-0.07z";
+}
+
+.slider .thumb.border{
+    -fx-shape: url('arrow.svg');
+}
+
+.slider .thumb.center{
+    -fx-shape: "m 2.6332938,294.40013 2.3657846,2.37415 m -2.3657846,-2.37415 2.3323461,-2.44938 m -2.3323461,2.44938 h 2.3490654 m -2.3741444,-2.48282 -0.016719,4.82353";
+}

@@ -11,25 +11,26 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.ResourceBundle;
 
 import org.python.core.PyException;
-import org.python.core.PyFloat;
 import org.python.core.PyInteger;
 import org.python.core.PyObject;
 import org.python.core.PySystemState;
 import org.python.util.PythonInterpreter;
 
 import de.keithpaterson.javafx.controls.slider.MultiThumbSlider;
+import de.keithpaterson.javafx.controls.slider.SimpleRangeBorderDoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.ScrollPane;
@@ -57,18 +58,18 @@ public class FXMLController implements Initializable {
 	@FXML
 	private TreeView<LabelNode> tree;
 
-	HashMap<Path, TreeItem> nodes = new HashMap<Path, TreeItem>();
+	HashMap<Path, TreeItem<LabelNode>> nodes = new HashMap<Path, TreeItem<LabelNode>>();
 	private PythonInterpreter interpreter = new PythonInterpreter();
 
 	public void initialize(URL url, ResourceBundle rb) {
 		System.out.println("de.keithpaterson.veneer.FXMLController.initialize()" + this.imagepane);
 		PySystemState.initialize();
 		try {
-//			if (this.imagepane != null) {
-//				Image i = new Image(
-//						"file:///D:\\git\\osm2city-data\\tex.src\\de\\industrial\\facade_industrial_red_white_24x18m.jpg");
-//				this.imagepane.setImage(i);
-//			}
+			// if (this.imagepane != null) {
+			// Image i = new Image(
+			// "file:///D:\\git\\osm2city-data\\tex.src\\de\\industrial\\facade_industrial_red_white_24x18m.jpg");
+			// this.imagepane.setImage(i);
+			// }
 			EventHandler<MouseEvent> mouseEventHandle = (MouseEvent event) -> {
 				handleMouseClicked(event);
 			};
@@ -76,10 +77,9 @@ public class FXMLController implements Initializable {
 			scrollpane.viewportBoundsProperty().addListener(new ChangeListener<Bounds>() {
 
 				@Override
-				public void changed(ObservableValue<? extends Bounds> observable, Bounds oldValue,
-						Bounds newValue) {
+				public void changed(ObservableValue<? extends Bounds> observable, Bounds oldValue, Bounds newValue) {
 					System.out.println(newValue);
-					
+
 				}
 			});
 			ChangeListener<Number> hlistener = new ChangeListener<Number>() {
@@ -87,17 +87,18 @@ public class FXMLController implements Initializable {
 				@Override
 				public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
 					slider_top.setPrefWidth(newValue.doubleValue());
-					double not_visible = imagepane.getBoundsInParent().getWidth() - scrollpane.getViewportBounds().getWidth();
+					double not_visible = imagepane.getBoundsInParent().getWidth()
+							- scrollpane.getViewportBounds().getWidth();
 					System.out.println(newValue.doubleValue());
-					double minX = not_visible*newValue.doubleValue();
-					double maxX = not_visible - minX;
-					System.out.println(minX + "\t" + maxX );
+					double minX = not_visible * newValue.doubleValue();
+					double maxX = scrollpane.getViewportBounds().getWidth() - not_visible + minX;
+					System.out.println(minX + "\t" + maxX);
 					slider_top.setMin((int) minX);
 					slider_top.setMax((int) maxX);
 				}
 			};
 			scrollpane.hvalueProperty().addListener(hlistener);
-//			scrollpane.widthProperty().addListener(hlistener);
+			// scrollpane.widthProperty().addListener(hlistener);
 			ChangeListener<Number> vlistener = new ChangeListener<Number>() {
 
 				@Override
@@ -152,7 +153,7 @@ public class FXMLController implements Initializable {
 
 	public void addFile(Path p) {
 		System.out.println(p);
-		TreeItem node = nodes.get(p.getParent());
+		TreeItem<LabelNode> node = nodes.get(p.getParent());
 		if (node == null)
 			return;
 
@@ -168,6 +169,7 @@ public class FXMLController implements Initializable {
 				interpreter.close();
 			} catch (final PyException pyException) {
 				pyException.printStackTrace();
+				tex.setError(pyException);
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -195,22 +197,64 @@ public class FXMLController implements Initializable {
 				System.out.println("Node click: " + t.getName().getString());
 				Image i = new Image("file:///D:\\git\\osm2city-data\\tex.src\\" + t.getName().getString());
 				this.imagepane.setImage(i);
-				ArrayList<SimpleDoubleProperty> hpos = new ArrayList<>();
+				// TODO build ranges
+				ArrayList<SimpleRangeBorderDoubleProperty> hpos = new ArrayList<>();
 				if (t.getH_cuts() != null) {
-					for (PyObject hcut : t.getH_cuts().getArray()) {
-						hpos.add(new SimpleDoubleProperty((double) ((PyInteger) hcut).getValue()));
-					}
+					hpos.addAll(getCuts(t.getH_cuts().getArray()));
 				}
 				this.slider_top.getThumbPositions().setAll(hpos);
-				ArrayList<SimpleDoubleProperty> vpos = new ArrayList<>();
+				// TODO build ranges
+				ArrayList<SimpleRangeBorderDoubleProperty> vpos = new ArrayList<>();
 				if (t.getV_cuts() != null) {
-					for (PyObject hcut : t.getV_cuts().getArray()) {
-						vpos.add(new SimpleDoubleProperty((double) ((PyInteger) hcut).getValue()));
-					}
+					vpos.addAll(getCuts(t.getV_cuts().getArray()));
 				}
 				this.slider_left.getThumbPositions().setAll(vpos);
 			}
 
 		}
+	}
+
+	/**
+	 * Detect gaps in the array to add left/right/center markers
+	 * 
+	 * @param array
+	 * @return
+	 */
+
+	private Collection<? extends SimpleRangeBorderDoubleProperty> getCuts(PyObject[] array) {
+		ArrayList<SimpleRangeBorderDoubleProperty> ret = new ArrayList<SimpleRangeBorderDoubleProperty>();
+		// -10 to have a gap at the beginning
+		double lastValue = -10;
+		SimpleRangeBorderDoubleProperty left = null;
+		for (PyObject pyObject : array) {
+			double currentValue = pyObject.asDouble();
+			// If the last value i
+			if (currentValue - lastValue > 1) {
+				if (left != null) {
+					if (left.get() == lastValue) {
+						left.setDirection(Pos.CENTER);
+						ret.add(left);
+					} else {
+						ret.add(left);
+						ret.add(new SimpleRangeBorderDoubleProperty(lastValue, Pos.CENTER_RIGHT));
+						left = null;
+					}
+				}
+				left = new SimpleRangeBorderDoubleProperty(currentValue, Pos.CENTER_LEFT);
+			}
+			lastValue = currentValue;
+		}
+		if( left != null )
+		{
+			if (left.get() == lastValue) {
+				left.setDirection(Pos.CENTER);
+				ret.add(left);
+			} else {
+				ret.add(left);
+				ret.add(new SimpleRangeBorderDoubleProperty(lastValue, Pos.CENTER_RIGHT));
+				left = null;
+			}
+		}
+		return ret;
 	}
 }

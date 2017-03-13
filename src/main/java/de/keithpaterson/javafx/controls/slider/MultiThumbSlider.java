@@ -21,34 +21,37 @@ import javafx.scene.control.Skin;
 public class MultiThumbSlider extends Control {
 
 	private static final String DEFAULT_STYLE_CLASS = "slider";
-	ObservableList<DoubleProperty> thumbPositions = new TrackableObservableList<DoubleProperty>() {
+	ObservableList<SimpleRangeBorderDoubleProperty> thumbPositions = new TrackableObservableList<SimpleRangeBorderDoubleProperty>() {
 
 		@Override
-		protected void onChanged(Change<DoubleProperty> c) {
-//			min.setValue( Integer.MAX_VALUE);
-//			max.setValue( 0);
-//			for(DoubleProperty val: c.getList())
-//			{
-//				min = Math.min(min, val.doubleValue());
-//				max = Math.max(max, val.doubleValue());
-//	
-//			}
+		protected void onChanged(Change<SimpleRangeBorderDoubleProperty> c) {
+			for(DoubleProperty val: c.getList())
+			{
+				min.setValue(Math.min(min.get(), val.doubleValue()));
+				max.setValue(Math.max(max.get(), val.doubleValue()));
+	
+			}
 		}
 	};
 
 	/**
 	 * @return the thumbPositions
 	 */
-	public ObservableList<DoubleProperty> getThumbPositions() {
+	public ObservableList<SimpleRangeBorderDoubleProperty> getThumbPositions() {
 		return thumbPositions;
 	}
 
 	private Orientation orientation = Orientation.HORIZONTAL;
 	private DoubleProperty max = new SimpleDoubleProperty();
+	
 	private DoubleProperty min = new SimpleDoubleProperty();
 
 	public MultiThumbSlider() {
-		setPrefSize(50, 50);
+		min.setValue( Integer.MAX_VALUE);
+		max.setValue( 0);
+
+		setPrefSize(10, 10);
+
 		getStyleClass().setAll(DEFAULT_STYLE_CLASS);
 	}
 

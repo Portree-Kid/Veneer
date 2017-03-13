@@ -14,17 +14,23 @@ import javafx.collections.ListChangeListener;
 import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
 import javafx.geometry.Point2D;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 
 /**
+ * Shows the visual representation of {@link MultiThumbSlider} in JavaFX.
  * 
  * @author keith.paterson
  *
  */
 
 public class MultiThumbSliderSkin extends BehaviorSkinBase<MultiThumbSlider, MultiThumbSliderBehavior> {
+
+	private static final String STYLE_THUMB = "thumb";
+
+	private static final String STYLE_TRACK = "track";
 
 	public static final String VALUE = "VALUE";
 
@@ -40,6 +46,18 @@ public class MultiThumbSliderSkin extends BehaviorSkinBase<MultiThumbSlider, Mul
 						redraw();
 					}
 				});
+			}
+		});
+		s.getMaxProperty().addListener(new ChangeListener<Number>() {
+			@Override
+			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+				positionThumbs();
+			}
+		});
+		s.getMinProperty().addListener(new ChangeListener<Number>() {
+			@Override
+			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+				positionThumbs();
 			}
 		});
 	}
@@ -64,36 +82,57 @@ public class MultiThumbSliderSkin extends BehaviorSkinBase<MultiThumbSlider, Mul
 
 	private double preDragThumbPos;
 	private javafx.geometry.Point2D dragStart; // in skin coordinates
-	
-	/**If true the values for the thumbs are not percent of max but the */
-//	private boolean trueMode = true;
+
+	/** If true the values for the thumbs are not percent of max but the */
+	// private boolean trueMode = true;
 
 	@Override
 	public void dispose() {
 		// TODO Auto-generated method stub
 
 	}
-	
+
 	/**
-	 * Readds our children if the number of nodes changes. 
+	 * Reads our children if the number of nodes changes.
 	 */
 
 	protected void redraw() {
 		track = new StackPane();
-		track.getStyleClass().setAll("track");
+		track.getStyleClass().setAll(STYLE_TRACK);
 		List<StackPane> rootChildren = new ArrayList<StackPane>();
 
-		for (DoubleProperty pos : getSkinnable().getThumbPositions()) {
+		for (SimpleRangeBorderDoubleProperty pos : getSkinnable().getThumbPositions()) {
 			final StackPane thumb = new StackPane();
 			thumb.getProperties().put(VALUE, pos);
-			positionThumb(thumb, pos.get(), getSkinnable().getOrientation()==Orientation.HORIZONTAL);
+			positionThumb(thumb, pos.get(), getSkinnable().getOrientation() == Orientation.HORIZONTAL);
 			pos.addListener(new ChangeListener<Number>() {
 				@Override
 				public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-					positionThumb(thumb, newValue.doubleValue(), getSkinnable().getOrientation()==Orientation.HORIZONTAL);
+					positionThumb(thumb, newValue.doubleValue(),
+							getSkinnable().getOrientation() == Orientation.HORIZONTAL);
 				}
 			});
-			thumb.getStyleClass().setAll("thumb");
+
+			switch (pos.getDirection()) {
+			case CENTER_LEFT:
+				thumb.getStyleClass().setAll("border", STYLE_THUMB);
+				
+				if( getSkinnable().getOrientation() == Orientation.VERTICAL)
+				  thumb.rotateProperty().set(-90);
+				else
+			      thumb.rotateProperty().set(0);				
+				break;
+			case CENTER_RIGHT:
+				thumb.getStyleClass().setAll("border", STYLE_THUMB);
+				if( getSkinnable().getOrientation() == Orientation.VERTICAL)
+				  thumb.rotateProperty().set(90);
+				else
+			      thumb.rotateProperty().set(180);				
+				break;
+			case CENTER:
+				thumb.getStyleClass().setAll("center", STYLE_THUMB);
+				break;
+			}
 			rootChildren.add(thumb);
 			thumb.setOnMousePressed(new javafx.event.EventHandler<MouseEvent>() {
 
@@ -110,21 +149,26 @@ public class MultiThumbSliderSkin extends BehaviorSkinBase<MultiThumbSlider, Mul
 					}
 				}
 			});
-	        thumb.setOnMouseDragged(new EventHandler<MouseEvent>() {
-	            @Override public void handle(MouseEvent me) {
-	                Point2D cur = thumb.localToParent(me.getX(), me.getY());
-	                double dragPos = (getSkinnable().getOrientation() == Orientation.HORIZONTAL)?
-	                    cur.getX() - dragStart.getX() : -(cur.getY() - dragStart.getY());
-	                    System.out.println(dragPos);
-	                getBehavior().thumbDragged(me, preDragThumbPos + dragPos / trackLength);
-	            }
-	        });			
+			thumb.setOnMouseDragged(new EventHandler<MouseEvent>() {
+				@Override
+				public void handle(MouseEvent me) {
+					Point2D cur = thumb.localToParent(me.getX(), me.getY());
+					double dragPos = (getSkinnable().getOrientation() == Orientation.HORIZONTAL)
+							? cur.getX() - dragStart.getX() : -(cur.getY() - dragStart.getY());
+					System.out.println(dragPos);
+					getBehavior().thumbDragged(me, preDragThumbPos + dragPos / trackLength);
+				}
+			});
 		}
 		thumbs.clear();
 		thumbs.addAll(rootChildren);
 		rootChildren.add(0, track);
 		getChildren().setAll(rootChildren);
-	}	
+	}
+
+	/**
+	 * 
+	 */
 
 	@Override
 	protected void layoutChildren(final double x, final double y, final double w, final double h) {
@@ -185,20 +229,19 @@ public class MultiThumbSliderSkin extends BehaviorSkinBase<MultiThumbSlider, Mul
 			positionThumb(stackPane, p.get(), horizontal);
 		}
 	}
-	
+
 	/**
-	 * 
+	 * Sets the thumb position to the required value.
 	 */
 
 	private void positionThumb(StackPane thumb, double pos, boolean horizontal) {
 		MultiThumbSlider s = getSkinnable();
-		final double endX = (horizontal) ? trackStart
-				+ (((trackLength * ((pos - s.getMin()) / (s.getMax() - s.getMin()))) - thumbWidth / 2))
+		final double endX = (horizontal)
+				? trackStart + (((trackLength * ((pos - s.getMin()) / (s.getMax() - s.getMin()))) - thumbWidth / 2))
 				: thumbLeft;
 		final double endY = (horizontal) ? thumbTop
-				: snappedTopInset() + trackLength
-						- (trackLength * ((pos - s.getMin()) / (s.getMax() - s.getMin()))); // -
-																										// thumbHeight/2
+				: snappedTopInset() + trackLength - (trackLength * ((pos - s.getMin()) / (s.getMax() - s.getMin()))); // -
+																														// thumbHeight/2
 		thumb.setLayoutX(endX);
 		thumb.setLayoutY(endY);
 	}
