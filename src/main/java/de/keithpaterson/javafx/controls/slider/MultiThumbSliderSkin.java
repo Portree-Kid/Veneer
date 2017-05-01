@@ -131,6 +131,10 @@ public class MultiThumbSliderSkin extends BehaviorSkinBase<MultiThumbSlider, Mul
 				break;
 			case CENTER:
 				thumb.getStyleClass().setAll("center", STYLE_THUMB);
+				if( getSkinnable().getOrientation() == Orientation.VERTICAL)
+					  thumb.rotateProperty().set(-90);
+					else
+				      thumb.rotateProperty().set(0);				
 				break;
 			}
 			rootChildren.add(thumb);

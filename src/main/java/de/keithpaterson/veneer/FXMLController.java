@@ -112,7 +112,7 @@ public class FXMLController implements Initializable {
 			TreeItem<LabelNode> rootNode = new TreeItem<LabelNode>();
 			// rootNode.setValue(new LabelNode("Images"));
 
-			Path root = Paths.get("D:\\git\\osm2city-data\\tex.src");
+			Path root = Paths.get("C:\\git\\osm2city-data\\tex.src");
 
 			try {
 
